@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, create_app
 
 client = TestClient(app)
 
@@ -9,6 +9,24 @@ def test_health():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_cors_preflight_allows_configured_origin(monkeypatch):
+    origin = "https://repair365mate.vercel.app"
+    monkeypatch.setenv("CORS_ALLOW_ORIGINS", f"http://localhost:3000,{origin}/")
+    test_client = TestClient(create_app())
+
+    response = test_client.options(
+        "/api/diagnose",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == origin
 
 
 def test_diagnose_returns_full_demo_shape():
