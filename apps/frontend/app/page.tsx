@@ -209,7 +209,7 @@ export default function Home() {
           </section>
         ) : (
           <div className="grid gap-5 pt-7 sm:pt-8 lg:grid-cols-[330px_1fr] lg:items-start">
-            <div className="lg:sticky lg:top-[72px]">
+            <div className="min-w-0 lg:sticky lg:top-[72px]">
               <Panel title="Intake" code="01 · symptoms">
                 <form
                   onSubmit={(event) => {
@@ -284,7 +284,7 @@ export default function Home() {
               </Panel>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="lg:sticky lg:top-[72px] z-10 rounded-xl border border-line/10 bg-housing/90 px-4 py-3 shadow-panel backdrop-blur">
                 <div className="flex gap-1 overflow-x-auto">
                   {TABS.map((tab) => (
