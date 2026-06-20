@@ -8,7 +8,9 @@ import { RepairFlow } from "@/components/RepairFlow";
 
 const AGENTS = [
   { id: "intake", label: "Intake", task: "Parse symptoms & skill level" },
+  { id: "retrieval", label: "Retrieval", task: "Pull manual evidence" },
   { id: "triage", label: "Triage", task: "Rank likely causes" },
+  { id: "planner", label: "Planner", task: "Build the repair plan" },
   { id: "safety", label: "Safety", task: "Screen for household risk" },
   { id: "impact", label: "Impact", task: "Estimate repair vs replace" },
 ] as const;
@@ -83,7 +85,7 @@ export default function Home() {
     try {
       const [diagnosis] = await Promise.all([
         diagnoseRepair(payload),
-        runSequence(reducedMotion() ? 0 : 650),
+        runSequence(reducedMotion() ? 0 : 460),
       ]);
       setResult(diagnosis);
       setPhase("done");
@@ -277,6 +279,29 @@ export default function Home() {
             <Panel title="RepairGraph" code="reasoning path">
               <RepairFlow nodes={result.graph.nodes} edges={result.graph.edges} />
             </Panel>
+
+            {result.evidence.length > 0 ? (
+              <Panel title="Evidence" code="retrieval">
+                <ul className="grid gap-3 lg:grid-cols-3">
+                  {result.evidence.map((item) => (
+                    <li
+                      key={item.id}
+                      className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3"
+                    >
+                      <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
+                        {item.source}
+                      </div>
+                      <p className="mt-2 text-[13px] leading-6 text-muted">
+                        &ldquo;{item.snippet}&rdquo;
+                      </p>
+                      <div className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted">
+                        supports · {item.supports}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </Panel>
+            ) : null}
 
             <div className="grid gap-5 lg:grid-cols-3">
               <Panel title="Likely causes" code="ranked">

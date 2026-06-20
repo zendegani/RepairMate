@@ -37,6 +37,13 @@ export type SustainabilityImpact = {
   message: string;
 };
 
+export type Evidence = {
+  id: string;
+  source: string;
+  snippet: string;
+  supports: string;
+};
+
 export type TimelineEvent = {
   id: string;
   agent: string;
@@ -66,6 +73,7 @@ export type DiagnoseResponse = {
   repair_plan: RepairStep[];
   sustainability_impact: SustainabilityImpact;
   safety_warnings: string[];
+  evidence: Evidence[];
   agent_timeline: TimelineEvent[];
   graph: {
     nodes: FlowNodeDto[];
