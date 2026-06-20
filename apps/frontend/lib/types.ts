@@ -34,6 +34,7 @@ export type RepairStep = {
 export type SustainabilityImpact = {
   landfill_waste_avoided_kg: number;
   co2_saved_kg: number;
+  replace_cost_usd: number;
   message: string;
 };
 

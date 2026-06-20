@@ -139,7 +139,7 @@ export default function Home() {
             <Readout label="Demo case" value="No drain" />
             <Readout label="Plan time" value="35" unit="min" />
             <Readout label="Est. cost" value="$12" />
-            <Readout label="Agents" value="4" />
+            <Readout label="Agents" value="6" />
           </div>
         </section>
 
@@ -218,6 +218,25 @@ export default function Home() {
                 <span className="text-chalk">{appliance || "—"}</span>
               </div>
 
+              {phase === "running" ? (
+                <div>
+                  <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest">
+                    <span className="text-signal">Running diagnostics</span>
+                    <span className="text-muted">
+                      {Math.min(activeStep + 1, AGENTS.length)}/{AGENTS.length}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-signal transition-all duration-300"
+                      style={{
+                        width: `${(Math.min(activeStep + 1, AGENTS.length) / AGENTS.length) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : null}
+
               <div className="space-y-2.5">
                 {AGENTS.map((agent, index) => (
                   <AgentRow
@@ -261,12 +280,13 @@ export default function Home() {
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
                 <Gauge value={result.recommendation.confidence} />
                 <div className="flex-1">
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ConfidencePill value={result.recommendation.confidence} />
                     <Chip>{result.recommendation.difficulty}</Chip>
                     <Chip>{result.recommendation.estimated_time_minutes} min</Chip>
                     <Chip>${result.recommendation.estimated_cost_usd}</Chip>
                   </div>
-                  <h3 className="mt-3 font-display text-xl font-semibold text-chalk">
+                  <h3 className="mt-3 font-display text-2xl font-semibold leading-snug text-chalk">
                     {result.recommendation.title}
                   </h3>
                   <p className="mt-2 leading-7 text-muted">
@@ -332,8 +352,24 @@ export default function Home() {
 
               <Panel title="Repair vs replace" code="impact">
                 <div className="space-y-4">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
-                    Repair · not replace
+                  <div className="rounded-lg border border-signal/25 bg-signal/[0.06] p-4">
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
+                      You keep
+                    </div>
+                    <div className="mt-1 font-mono text-3xl font-semibold text-chalk">
+                      $
+                      {result.sustainability_impact.replace_cost_usd -
+                        result.recommendation.estimated_cost_usd}
+                    </div>
+                    <div className="mt-1.5 flex items-center gap-2 font-mono text-[11px] text-muted">
+                      <span className="text-signal">
+                        Repair ${result.recommendation.estimated_cost_usd}
+                      </span>
+                      <span className="text-muted/50">vs</span>
+                      <span className="text-muted line-through decoration-caution/60">
+                        Replace ${result.sustainability_impact.replace_cost_usd}
+                      </span>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <Figure
@@ -354,6 +390,9 @@ export default function Home() {
               </Panel>
 
               <Panel title="Safety" code="human check">
+                <p className="mb-3 font-mono text-[11px] leading-5 text-muted">
+                  Human review required before you proceed.
+                </p>
                 <ul className="space-y-2.5">
                   {result.safety_warnings.map((warning) => (
                     <li
@@ -537,11 +576,20 @@ function AgentRow({
   );
 }
 
+const CONFIDENCE_COLOR = { high: "#39d98a", medium: "#e8a24a", low: "#7b918a" };
+
+function confidenceTier(value: number): "high" | "medium" | "low" {
+  if (value >= 0.8) return "high";
+  if (value >= 0.6) return "medium";
+  return "low";
+}
+
 function Gauge({ value }: { value: number }) {
   const pct = Math.round(value * 100);
   const radius = 34;
   const circumference = 2 * Math.PI * radius;
   const dash = circumference * Math.max(0, Math.min(1, value));
+  const color = CONFIDENCE_COLOR[confidenceTier(value)];
 
   return (
     <div className="relative h-24 w-24 shrink-0">
@@ -559,7 +607,7 @@ function Gauge({ value }: { value: number }) {
           cy="40"
           r={radius}
           fill="none"
-          stroke="#39d98a"
+          stroke={color}
           strokeWidth="6"
           strokeLinecap="round"
           strokeDasharray={`${dash} ${circumference}`}
@@ -570,6 +618,24 @@ function Gauge({ value }: { value: number }) {
         <span className="font-mono text-[9px] tracking-[0.2em] text-muted">CONF</span>
       </div>
     </div>
+  );
+}
+
+function ConfidencePill({ value }: { value: number }) {
+  const tier = confidenceTier(value);
+  const color = CONFIDENCE_COLOR[tier];
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded border px-2 py-1 font-mono text-[11px] uppercase tracking-widest"
+      style={{
+        color,
+        borderColor: `${color}55`,
+        backgroundColor: `${color}14`,
+      }}
+    >
+      <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+      {tier} confidence
+    </span>
   );
 }
 
