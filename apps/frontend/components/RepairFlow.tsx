@@ -25,7 +25,7 @@ function RepairNode({
   const category = CATEGORY[data.kind];
   return (
     <div
-      className="min-w-[150px] rounded-lg border border-white/15 bg-raised px-3.5 py-2.5 shadow-panel"
+      className="min-w-[150px] rounded-lg border border-line/15 bg-raised px-3.5 py-2.5 shadow-panel"
       style={{ borderLeft: `3px solid ${category.color}` }}
     >
       <Handle
@@ -86,15 +86,15 @@ export function RepairFlow({ nodes, edges }: RepairFlowProps) {
     target: edge.target,
     label: edge.label ?? undefined,
     animated: true,
-    style: { stroke: "#39d98a", strokeWidth: 1.5 },
-    labelStyle: { fill: "#7b918a", fontFamily: "var(--font-mono)", fontSize: 10 },
-    labelBgStyle: { fill: "#101a17", fillOpacity: 0.95 },
+    style: { stroke: "rgb(var(--signal))", strokeWidth: 1.5 },
+    labelStyle: { fill: "rgb(var(--muted))", fontFamily: "var(--font-mono)", fontSize: 10 },
+    labelBgStyle: { fill: "rgb(var(--panel))", fillOpacity: 0.95 },
     labelBgPadding: [5, 3] as [number, number],
     labelBgBorderRadius: 3,
   }));
 
   return (
-    <div className="overflow-hidden rounded-lg border border-white/10 bg-housing">
+    <div className="overflow-hidden rounded-lg border border-line/10 bg-housing">
       <div className="h-[300px]">
         <ReactFlow
           nodes={flowNodes}
@@ -108,10 +108,10 @@ export function RepairFlow({ nodes, edges }: RepairFlowProps) {
           panOnScroll={false}
           proOptions={{ hideAttribution: true }}
         >
-          <Background color="#1c2a26" gap={22} />
+          <Background color="rgb(127 145 138 / 0.3)" gap={22} />
         </ReactFlow>
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/10 px-4 py-2.5">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line/10 px-4 py-2.5">
         {Object.values(CATEGORY).map((category) => (
           <span
             key={category.label}
