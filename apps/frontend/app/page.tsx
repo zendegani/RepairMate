@@ -93,7 +93,7 @@ export default function Home() {
       setError(
         diagnosisError instanceof Error
           ? diagnosisError.message
-          : "RepairMate could not complete the diagnosis.",
+          : "FixWise could not complete the diagnosis.",
       );
       setPhase("idle");
       setActiveStep(-1);
@@ -109,7 +109,7 @@ export default function Home() {
               <span className="h-2 w-2 rounded-full bg-signal animate-pulse-dot" />
             </span>
             <span className="font-display text-sm font-semibold tracking-wide text-chalk">
-              RepairMate
+              FixWise
             </span>
             <span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted sm:inline">
               Service Console
@@ -131,9 +131,9 @@ export default function Home() {
             Find the fault before you replace the machine.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-            RepairMate runs a chain of repair agents over your appliance&apos;s
-            symptoms and turns them into a safe, explainable fix — so repair stays
-            the default, not replacement.
+            FixWise is AI that helps you repair, not replace. It runs a chain of
+            repair agents over your appliance&apos;s symptoms and turns them into a
+            safe, explainable fix — so repair stays the default.
           </p>
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4">
             <Readout label="Demo case" value="No drain" />
@@ -478,7 +478,7 @@ export default function Home() {
 
       <footer className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-5 font-mono text-[10px] uppercase tracking-widest text-muted sm:px-8">
-          <span>RepairMate · RepairGraph</span>
+          <span>FixWise · RepairGraph</span>
           <span>Repair, not replace</span>
         </div>
       </footer>

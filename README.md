@@ -1,6 +1,9 @@
-# RepairMate
+# FixWise
 
-Hackathon demo monorepo for an agentic appliance repair assistant.
+AI that helps you repair, not replace.
+
+Hackathon demo monorepo for an agentic appliance repair assistant. (The repo and
+package slug remain `repairmate`; `FixWise` is the product name.)
 
 ## Apps
 
@@ -60,4 +63,4 @@ npm run test:backend
 
 ## Demo Path
 
-The diagnosis form is prefilled for a washing machine that does not drain. Submitting it calls `POST /api/diagnose` and renders a repair recommendation, likely causes, repair plan, sustainability impact, safety warnings, agent timeline, and a React Flow execution graph. The response is produced by `app/services/pipeline.py`, currently a static payload that the agent pipeline will grow into behind the same response shape.
+The diagnosis form is prefilled for a washing machine that does not drain. Submitting it calls `POST /api/diagnose`, which runs the deterministic agent pipeline in `app/services/pipeline.py` (intake → retrieval → diagnosis → planner → sustainability → safety → graph_builder) over the mock data in `app/data/*.json`. The UI renders the recommendation with a confidence gauge, retrieved evidence, ranked causes, repair plan, repair-vs-replace impact, safety warnings, the agent log, and a React Flow reasoning graph.

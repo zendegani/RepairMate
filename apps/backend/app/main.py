@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import diagnose
 
-app = FastAPI(title="RepairMate API", version="0.1.0")
+app = FastAPI(title="FixWise API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,

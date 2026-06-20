@@ -21,8 +21,8 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RepairMate · Service Console",
-  description: "Agentic appliance repair diagnostics — repair, not replace.",
+  title: "FixWise · Service Console",
+  description: "AI that helps you repair, not replace.",
 };
 
 export default function RootLayout({
