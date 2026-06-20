@@ -29,6 +29,42 @@ def test_cors_preflight_allows_configured_origin(monkeypatch):
     assert response.headers["access-control-allow-origin"] == origin
 
 
+def test_cors_preflight_allows_project_vercel_preview_url():
+    # A preview URL for this project that is not in CORS_ALLOW_ORIGINS should
+    # still pass via the default project-scoped Vercel regex.
+    origin = "https://repair365mate-git-feature-branch-acme.vercel.app"
+    test_client = TestClient(create_app())
+
+    response = test_client.options(
+        "/api/diagnose",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == origin
+
+
+def test_cors_preflight_rejects_foreign_vercel_url():
+    # An unrelated *.vercel.app site must not be allowed credentialed access.
+    origin = "https://evil.vercel.app"
+    test_client = TestClient(create_app())
+
+    response = test_client.options(
+        "/api/diagnose",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+
+    assert "access-control-allow-origin" not in response.headers
+
+
 def test_diagnose_returns_full_demo_shape():
     payload = {
         "appliance": "Washing machine",
