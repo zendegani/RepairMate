@@ -1,50 +1,83 @@
-# FixWise
+<p align="center">
+  <img src="docs/assets/repairmate-logo.svg" alt="RepairMate logo" width="520">
+</p>
 
-AI that helps you repair, not replace.
+<p align="center">
+  <strong>Repair smarter. Replace less.</strong>
+</p>
 
-Hackathon demo monorepo for an agentic appliance repair assistant. (The repo and
-package slug remain `repairmate`; `FixWise` is the product name.)
+<p align="center">
+  Agentic repair intelligence for appliance diagnosis, explainable repair planning, and circular-economy impact.
+</p>
+
+<p align="center">
+  <img src="docs/assets/repairmate-hero.svg" alt="RepairMate warm repair intelligence hero">
+</p>
+
+## Overview
+
+RepairMate helps people keep appliances in use longer by turning symptoms, manual evidence, safety constraints, cost estimates, and sustainability signals into a guided repair workflow.
+
+The reasoning layer is **RepairGraph**: a deterministic multi-agent pipeline that produces ranked causes, a repair plan, safety warnings, repair-vs-replace impact, an agent log, and a visual decision graph.
+
+## Demo Flow
+
+The app ships with a prefilled washing-machine case:
+
+> The washing machine does not drain.
+
+Submitting the diagnosis form calls `POST /api/diagnose`, then renders:
+
+- agent execution sequence
+- primary repair recommendation with confidence
+- likely causes ranked by evidence
+- step-by-step repair plan
+- safety warnings
+- repair-vs-replace cost impact
+- landfill and CO2 savings
+- retrieved evidence snippets
+- React Flow RepairGraph reasoning path
 
 ## Apps
 
-- `apps/frontend`: Next.js, TypeScript, Tailwind, React Flow
+- `apps/frontend`: Next.js, TypeScript, Tailwind CSS, React Flow
 - `apps/backend`: FastAPI, Python, Pydantic
 
 ## Layout
 
 ```text
 apps/
-  frontend/            # Next.js App Router
-    app/               # routes, layout, global styles
-    components/        # UI components (RepairFlow, ...)
-    lib/               # api client + shared types
+  frontend/
+    app/               # Next.js App Router
+    components/        # UI components
+    lib/               # API client and shared types
   backend/
     app/
-      main.py          # FastAPI app + middleware wiring
+      main.py          # FastAPI app and middleware
       schemas.py       # Pydantic request/response models
-      routers/         # HTTP routes (diagnose)
-      services/        # diagnosis pipeline + agent modules
+      routers/         # HTTP routes
+      services/        # repair agents and diagnosis pipeline
+      data/            # mock manuals, repair knowledge, impact data
     tests/             # pytest API tests
+docs/
+  assets/              # README logo and hero
 ```
-
-The JS side is an npm workspace, so a single `npm install` at the repo root installs
-the frontend and produces one root `package-lock.json`.
 
 ## Run Locally
 
-Install frontend dependencies (from the repo root):
+Install frontend dependencies from the repo root:
 
 ```bash
 npm install
 ```
 
-Backend (from the repo root):
+Start the backend:
 
 ```bash
 npm run dev:backend
 ```
 
-Frontend (from the repo root):
+Start the frontend:
 
 ```bash
 npm run dev:frontend
@@ -52,15 +85,28 @@ npm run dev:frontend
 
 Open `http://localhost:3000`.
 
-The frontend calls `NEXT_PUBLIC_API_URL` when set, otherwise `http://localhost:8000`
-(see `apps/frontend/.env.example`).
+The frontend calls `NEXT_PUBLIC_API_URL` when set, otherwise `http://localhost:8000`.
 
 ## Test
+
+Run backend tests:
 
 ```bash
 npm run test:backend
 ```
 
-## Demo Path
+Build the frontend:
 
-The diagnosis form is prefilled for a washing machine that does not drain. Submitting it calls `POST /api/diagnose`, which runs the deterministic agent pipeline in `app/services/pipeline.py` (intake → retrieval → diagnosis → planner → sustainability → safety → graph_builder) over the mock data in `app/data/*.json`. The UI renders the recommendation with a confidence gauge, retrieved evidence, ranked causes, repair plan, repair-vs-replace impact, safety warnings, the agent log, and a React Flow reasoning graph.
+```bash
+npm run build:frontend
+```
+
+## Brand Direction
+
+RepairMate uses a warm technical sustainability palette:
+
+- cream and sand for the base UI
+- forest green for diagnosis confidence and successful repair paths
+- copper for tools, cost savings, and replace-avoided moments
+- red clay for safety and high-risk warnings
+- graphite for dark mode and technical surfaces
