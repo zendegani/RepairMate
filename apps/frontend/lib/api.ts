@@ -14,7 +14,7 @@ export async function diagnoseRepair(
   });
 
   if (!response.ok) {
-    throw new Error("FixWise could not complete the diagnosis.");
+    throw new Error("RepairMate could not complete the diagnosis.");
   }
 
   return response.json();

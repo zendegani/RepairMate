@@ -13,10 +13,10 @@ import "@xyflow/react/dist/style.css";
 import type { FlowEdgeDto, FlowNodeDto } from "@/lib/types";
 
 const CATEGORY: Record<FlowNodeDto["kind"], { color: string; label: string }> = {
-  input: { color: "#39d98a", label: "Input" },
-  agent: { color: "#6aa9e9", label: "Agent" },
-  decision: { color: "#e8a24a", label: "Decision" },
-  output: { color: "#a78bfa", label: "Output" },
+  input: { color: "#2F7D5B", label: "Input" },
+  agent: { color: "#506A64", label: "Agent" },
+  decision: { color: "#D98A3D", label: "Decision" },
+  output: { color: "#174C38", label: "Output" },
 };
 
 function RepairNode({

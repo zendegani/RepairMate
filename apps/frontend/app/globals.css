@@ -5,26 +5,28 @@
 :root,
 .dark {
   color-scheme: dark;
-  --housing: 11 19 17;
-  --panel: 16 26 23;
-  --raised: 21 33 29;
-  --chalk: 231 239 233;
-  --muted: 142 162 154;
-  --line: 255 255 255;
-  --signal: 57 217 138;
-  --caution: 232 162 74;
+  --housing: 16 20 17;
+  --panel: 23 29 25;
+  --raised: 32 40 32;
+  --chalk: 243 240 232;
+  --muted: 166 176 168;
+  --line: 45 56 48;
+  --signal: 72 184 131;
+  --caution: 226 161 94;
+  --danger: 210 106 87;
 }
 
 .light {
   color-scheme: light;
-  --housing: 244 246 242;
+  --housing: 247 244 237;
   --panel: 255 255 255;
-  --raised: 248 250 248;
-  --chalk: 24 35 31;
-  --muted: 92 109 102;
-  --line: 17 31 28;
-  --signal: 22 150 96;
-  --caution: 176 104 28;
+  --raised: 239 234 224;
+  --chalk: 30 37 32;
+  --muted: 102 115 106;
+  --line: 221 214 200;
+  --signal: 47 125 91;
+  --caution: 217 138 61;
+  --danger: 185 80 62;
 }
 
 * {
@@ -37,10 +39,10 @@ body {
   color: rgb(var(--chalk));
   background-color: rgb(var(--housing));
   background-image:
-    radial-gradient(900px circle at 88% -8%, rgb(var(--signal) / 0.1), transparent 60%),
-    radial-gradient(680px circle at -5% 2%, rgb(var(--caution) / 0.06), transparent 55%),
-    linear-gradient(rgb(var(--line) / 0.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--line) / 0.022) 1px, transparent 1px);
+    radial-gradient(900px circle at 88% -8%, rgb(var(--signal) / 0.08), transparent 60%),
+    radial-gradient(680px circle at -5% 2%, rgb(var(--caution) / 0.08), transparent 55%),
+    linear-gradient(rgb(var(--line) / 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--line) / 0.18) 1px, transparent 1px);
   background-size: auto, auto, 34px 34px, 34px 34px;
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -55,7 +57,7 @@ select {
 }
 
 ::selection {
-  background: rgba(57, 217, 138, 0.3);
+  background: rgb(var(--signal) / 0.25);
 }
 
 .react-flow__attribution {

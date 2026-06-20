@@ -18,6 +18,7 @@ const config: Config = {
         line: "rgb(var(--line) / <alpha-value>)",
         signal: "rgb(var(--signal) / <alpha-value>)",
         caution: "rgb(var(--caution) / <alpha-value>)",
+        danger: "rgb(var(--danger) / <alpha-value>)",
       },
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],

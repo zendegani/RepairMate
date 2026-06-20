@@ -21,7 +21,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FixWise · Service Console",
+  title: "RepairMate · Powered by RepairGraph",
   description: "AI that helps you repair, not replace.",
 };
 

@@ -124,7 +124,7 @@ export default function Home() {
       setError(
         diagnosisError instanceof Error
           ? diagnosisError.message
-          : "FixWise could not complete the diagnosis.",
+          : "RepairMate could not complete the diagnosis.",
       );
       setPhase("idle");
       setActiveStep(-1);
@@ -143,10 +143,10 @@ export default function Home() {
           >
             <LogoMark size="sm" />
             <span className="font-display text-sm font-semibold tracking-wide text-chalk">
-              FixWise
+              RepairMate
             </span>
             <span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted sm:inline">
-              Service Console
+              Powered by RepairGraph
             </span>
           </button>
           <div className="flex items-center gap-3">
@@ -179,7 +179,7 @@ export default function Home() {
                     Find the fault before you replace the machine.
                   </h1>
                   <p className="mt-5 max-w-xl text-base leading-7 text-muted sm:text-lg">
-                    FixWise is AI that helps you repair, not replace. It runs a chain of
+                    RepairMate is AI that helps you repair, not replace. It runs a chain of
                     repair agents over your appliance&apos;s symptoms and turns them into a
                     safe, explainable fix.
                   </p>
@@ -268,7 +268,7 @@ export default function Home() {
                   </Field>
 
                   {error ? (
-                    <p className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 font-mono text-[12px] text-red-400">
+                    <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 font-mono text-[12px] text-danger">
                       {error}
                     </p>
                   ) : null}
@@ -478,8 +478,8 @@ export default function Home() {
                   result ? (
                     <div className="grid gap-5 lg:grid-cols-2">
                       <Panel title="Repair vs replace" code="cost">
-                        <div className="rounded-lg border border-signal/25 bg-signal/[0.06] p-5">
-                          <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
+                        <div className="rounded-lg border border-caution/30 bg-caution/[0.08] p-5">
+                          <div className="font-mono text-[10px] uppercase tracking-widest text-caution">
                             You keep
                           </div>
                           <div className="mt-1 font-mono text-4xl font-semibold text-chalk">
@@ -488,7 +488,7 @@ export default function Home() {
                               result.recommendation.estimated_cost_usd}
                           </div>
                           <div className="mt-2 flex items-center gap-2 font-mono text-[12px] text-muted">
-                            <span className="text-signal">
+                            <span className="text-caution">
                               Repair ${result.recommendation.estimated_cost_usd}
                             </span>
                             <span className="text-muted/50">vs</span>
@@ -606,7 +606,7 @@ export default function Home() {
 
       <footer className="border-t border-line/10">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-5 font-mono text-[10px] uppercase tracking-widest text-muted sm:px-8">
-          <span>FixWise · RepairGraph</span>
+          <span>RepairMate · RepairGraph</span>
           <span>Repair, not replace</span>
         </div>
       </footer>
@@ -704,15 +704,15 @@ function HeroVisual() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-lg border border-signal/25 bg-signal/[0.06] p-3">
+        <div className="mt-4 rounded-lg border border-caution/30 bg-caution/[0.08] p-3">
           <div className="flex items-baseline justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-signal">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-caution">
               You keep
             </span>
             <span className="font-mono text-2xl font-semibold text-chalk">$608</span>
           </div>
           <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted">
-            <span className="text-signal">Repair $12</span>
+            <span className="text-caution">Repair $12</span>
             <span className="text-muted/50">vs</span>
             <span className="line-through decoration-caution/60">Replace $620</span>
           </div>
@@ -742,10 +742,10 @@ function HeroVisual() {
           <line x1="14" y1="20" x2="60" y2="20" stroke="rgb(var(--signal))" strokeWidth="1.5" />
           <line x1="68" y1="20" x2="114" y2="11" stroke="rgb(var(--signal))" strokeWidth="1.5" />
           <line x1="68" y1="20" x2="114" y2="29" stroke="rgb(var(--signal))" strokeWidth="1.5" />
-          <circle cx="10" cy="20" r="5" fill="#39d98a" />
-          <circle cx="64" cy="20" r="5" fill="#6aa9e9" />
-          <circle cx="118" cy="11" r="5" fill="#a78bfa" />
-          <circle cx="118" cy="29" r="5" fill="#e8a24a" />
+          <circle cx="10" cy="20" r="5" fill="#2F7D5B" />
+          <circle cx="64" cy="20" r="5" fill="#506A64" />
+          <circle cx="118" cy="11" r="5" fill="#174C38" />
+          <circle cx="118" cy="29" r="5" fill="#D98A3D" />
         </svg>
       </div>
     </div>
@@ -772,7 +772,7 @@ function SummaryBar({ result }: { result: DiagnoseResponse }) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded border border-signal/30 bg-signal/10 px-2 py-1 font-mono text-[11px] text-signal">
+        <span className="rounded border border-caution/30 bg-caution/10 px-2 py-1 font-mono text-[11px] text-caution">
           ${saved} kept
         </span>
         <Chip>{rec.difficulty}</Chip>
@@ -875,7 +875,7 @@ function AgentRow({
   );
 }
 
-const CONFIDENCE_COLOR = { high: "#39d98a", medium: "#e8a24a", low: "#7b918a" };
+const CONFIDENCE_COLOR = { high: "#2F7D5B", medium: "#D98A3D", low: "#66736A" };
 
 function confidenceTier(value: number): "high" | "medium" | "low" {
   if (value >= 0.8) return "high";
