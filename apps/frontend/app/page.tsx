@@ -1,7 +1,6 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
-import type * as React from "react";
 import { diagnoseRepair } from "@/lib/api";
 import type { Cause, DiagnoseRequest, DiagnoseResponse, SkillLevel } from "@/lib/types";
 import { RepairFlow } from "@/components/RepairFlow";
@@ -17,6 +16,7 @@ const AGENTS = [
 ] as const;
 
 const TABS = [
+  { id: "sequence", label: "Diagnostic sequence" },
   { id: "diagnosis", label: "Diagnosis" },
   { id: "plan", label: "Repair plan" },
   { id: "impact", label: "Impact" },
@@ -60,7 +60,7 @@ export default function Home() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeStep, setActiveStep] = useState(-1);
   const [settling, setSettling] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabId>("diagnosis");
+  const [activeTab, setActiveTab] = useState<TabId>("sequence");
 
   function stepStatus(index: number) {
     if (phase === "idle") return "standby" as const;
@@ -86,14 +86,21 @@ export default function Home() {
     setSettling(false);
   }
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
+  function enterWorkspace() {
+    setStarted(true);
+    setActiveTab("sequence");
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  async function runDiagnosis() {
     setError(null);
     setResult(null);
     setPhase("running");
     setActiveStep(0);
     setSettling(false);
-    setActiveTab("diagnosis");
+    setActiveTab("sequence");
 
     const payload: DiagnoseRequest = {
       appliance,
@@ -114,6 +121,7 @@ export default function Home() {
       ]);
       setResult(diagnosis);
       setPhase("done");
+      setActiveTab("diagnosis");
     } catch (diagnosisError) {
       setError(
         diagnosisError instanceof Error
@@ -124,7 +132,7 @@ export default function Home() {
       setActiveStep(-1);
       setSettling(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen">
@@ -143,9 +151,17 @@ export default function Home() {
               Service Console
             </span>
           </button>
-          <div className="flex items-center gap-4 font-mono text-[10px] uppercase tracking-widest text-muted">
-            <span className="hidden sm:inline">RepairGraph v0.1</span>
-            <span className="text-signal">● online</span>
+          <div className="flex items-center gap-3">
+            <span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted sm:inline">
+              <span className="text-signal">●</span> online
+            </span>
+            <button
+              type="button"
+              onClick={enterWorkspace}
+              className="rounded-md bg-signal px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-widest text-housing transition hover:bg-signal/90"
+            >
+              Try it out
+            </button>
             <ThemeToggle />
           </div>
         </div>
@@ -172,7 +188,7 @@ export default function Home() {
                   <div className="mt-9 flex flex-wrap items-center gap-4">
                     <button
                       type="button"
-                      onClick={() => setStarted(true)}
+                      onClick={enterWorkspace}
                       className="rounded-md bg-signal px-5 py-3 text-sm font-semibold text-housing shadow-signal transition hover:bg-signal/90"
                     >
                       Try it out →
@@ -197,7 +213,13 @@ export default function Home() {
           <div className="grid gap-5 pt-7 sm:pt-8 lg:grid-cols-[330px_1fr] lg:items-start">
             <div className="lg:sticky lg:top-[72px]">
               <Panel title="Intake" code="01 · symptoms">
-                <form onSubmit={onSubmit} className="space-y-4">
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void runDiagnosis();
+                  }}
+                  className="space-y-4"
+                >
                   <Field label="Appliance">
                     <input
                       className="input"
@@ -265,292 +287,320 @@ export default function Home() {
             </div>
 
             <div>
-              {phase === "done" && result ? (
-                <>
-                  <div className="sticky top-[72px] z-10 rounded-xl border border-line/10 bg-housing/90 px-4 py-3 shadow-panel backdrop-blur">
+              <div className="sticky top-[72px] z-10 rounded-xl border border-line/10 bg-housing/90 px-4 py-3 shadow-panel backdrop-blur">
+                <div className="flex gap-1 overflow-x-auto">
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`whitespace-nowrap rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition ${
+                        activeTab === tab.id
+                          ? "bg-signal/15 text-signal"
+                          : "text-muted hover:text-chalk"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+                {result ? (
+                  <div className="mt-3 border-t border-line/10 pt-3">
                     <SummaryBar result={result} />
-                    <div className="mt-3 flex gap-1 overflow-x-auto">
-                      {TABS.map((tab) => (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          onClick={() => setActiveTab(tab.id)}
-                          className={`whitespace-nowrap rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition ${
-                            activeTab === tab.id
-                              ? "bg-signal/15 text-signal"
-                              : "text-muted hover:text-chalk"
-                          }`}
-                        >
-                          {tab.label}
-                        </button>
-                      ))}
-                    </div>
                   </div>
+                ) : null}
+              </div>
 
-                  <div className="mt-5 animate-fade-up">
-                    {activeTab === "diagnosis" ? (
-                      <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr]">
-                        <Panel title="Repair recommendation" code="primary" accent>
-                          <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-                            <Gauge value={result.recommendation.confidence} />
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <ConfidencePill value={result.recommendation.confidence} />
-                                <Chip>{result.recommendation.difficulty}</Chip>
-                                <Chip>{result.recommendation.estimated_time_minutes} min</Chip>
-                                <Chip>${result.recommendation.estimated_cost_usd}</Chip>
-                              </div>
-                              <h3 className="mt-3 font-display text-2xl font-semibold leading-snug text-chalk">
-                                {result.recommendation.title}
-                              </h3>
-                              <p className="mt-2 leading-7 text-muted">
-                                {result.recommendation.summary}
-                              </p>
-                            </div>
-                          </div>
-                        </Panel>
-
-                        <Panel title="Likely causes" code="ranked">
-                          <ul className="space-y-3">
-                            {result.likely_causes.map((cause) => (
-                              <li
-                                key={cause.name}
-                                className="rounded-lg border border-line/[0.08] bg-line/[0.02] p-3"
-                              >
-                                <div className="flex items-center justify-between gap-2">
-                                  <span className="font-display text-sm font-medium text-chalk">
-                                    {cause.name}
-                                  </span>
-                                  <span className="flex items-center gap-2">
-                                    <SignalBars level={cause.likelihood} />
-                                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
-                                      {cause.likelihood}
-                                    </span>
-                                  </span>
-                                </div>
-                                <p className="mt-2 text-[13px] leading-6 text-muted">
-                                  {cause.evidence}
-                                </p>
-                              </li>
-                            ))}
-                          </ul>
-                        </Panel>
+              <div className="mt-5 animate-fade-up">
+                {activeTab === "sequence" ? (
+                  <Panel title="Diagnostic sequence" code="RepairGraph">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-widest">
+                        <span className="text-muted">Target</span>
+                        <span className="text-chalk">{appliance || "—"}</span>
                       </div>
-                    ) : null}
 
-                    {activeTab === "plan" ? (
-                      <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr]">
-                        <Panel title="Repair plan" code="procedure">
-                          <ol className="space-y-3">
-                            {result.repair_plan.map((step) => (
-                              <li
-                                key={step.step}
-                                className="flex gap-4 rounded-lg border border-line/[0.08] bg-line/[0.02] p-4"
-                              >
-                                <span className="font-mono text-sm text-signal">
-                                  {String(step.step).padStart(2, "0")}
-                                </span>
-                                <div className="min-w-0 flex-1">
-                                  <h4 className="font-display text-sm font-semibold text-chalk">
-                                    {step.title}
-                                  </h4>
-                                  <p className="mt-1 text-[13px] leading-6 text-muted">
-                                    {step.detail}
-                                  </p>
-                                  {step.tools.length > 0 ? (
-                                    <div className="mt-2.5 flex flex-wrap gap-1.5">
-                                      {step.tools.map((tool) => (
-                                        <Chip key={tool}>{tool}</Chip>
-                                      ))}
-                                    </div>
-                                  ) : null}
-                                </div>
-                              </li>
-                            ))}
-                          </ol>
-                        </Panel>
-
-                        <Panel title="Safety" code="human check">
-                          <p className="mb-3 font-mono text-[11px] leading-5 text-muted">
-                            Human review required before you proceed.
-                          </p>
-                          <ul className="space-y-2.5">
-                            {result.safety_warnings.map((warning) => (
-                              <li
-                                key={warning}
-                                className="flex gap-3 rounded-lg border border-caution/25 bg-caution/[0.06] p-3"
-                              >
-                                <span className="mt-0.5 font-mono text-caution">▲</span>
-                                <span className="text-[13px] leading-6 text-chalk/90">
-                                  {warning}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </Panel>
-                      </div>
-                    ) : null}
-
-                    {activeTab === "impact" ? (
-                      <div className="grid gap-5 lg:grid-cols-2">
-                        <Panel title="Repair vs replace" code="cost">
-                          <div className="rounded-lg border border-signal/25 bg-signal/[0.06] p-5">
-                            <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
-                              You keep
-                            </div>
-                            <div className="mt-1 font-mono text-4xl font-semibold text-chalk">
-                              $
-                              {result.sustainability_impact.replace_cost_usd -
-                                result.recommendation.estimated_cost_usd}
-                            </div>
-                            <div className="mt-2 flex items-center gap-2 font-mono text-[12px] text-muted">
-                              <span className="text-signal">
-                                Repair ${result.recommendation.estimated_cost_usd}
-                              </span>
-                              <span className="text-muted/50">vs</span>
-                              <span className="text-muted line-through decoration-caution/60">
-                                Replace ${result.sustainability_impact.replace_cost_usd}
-                              </span>
-                            </div>
+                      {phase === "running" ? (
+                        <div>
+                          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest">
+                            <span className="text-signal">Running diagnostics</span>
+                            <span className="text-muted">
+                              {Math.min(activeStep + 1, AGENTS.length)}/{AGENTS.length}
+                            </span>
                           </div>
-                        </Panel>
-
-                        <Panel title="Environmental impact" code="repair · not replace">
-                          <div className="grid grid-cols-2 gap-3">
-                            <Figure
-                              value={result.sustainability_impact.landfill_waste_avoided_kg}
-                              unit="kg"
-                              label="Waste avoided"
-                            />
-                            <Figure
-                              value={result.sustainability_impact.co2_saved_kg}
-                              unit="kg CO₂"
-                              label="Emissions saved"
+                          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-line/10">
+                            <div
+                              className="h-full rounded-full bg-signal transition-all duration-300"
+                              style={{
+                                width: `${(Math.min(activeStep + 1, AGENTS.length) / AGENTS.length) * 100}%`,
+                              }}
                             />
                           </div>
-                          <p className="mt-4 text-[13px] leading-6 text-muted">
-                            {result.sustainability_impact.message}
-                          </p>
-                        </Panel>
-                      </div>
-                    ) : null}
-
-                    {activeTab === "evidence" ? (
-                      <Panel title="Evidence" code="retrieval">
-                        {result.evidence.length > 0 ? (
-                          <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                            {result.evidence.map((item) => (
-                              <li
-                                key={item.id}
-                                className="rounded-lg border border-line/[0.08] bg-line/[0.02] p-3"
-                              >
-                                <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
-                                  {item.source}
-                                </div>
-                                <p className="mt-2 text-[13px] leading-6 text-muted">
-                                  &ldquo;{item.snippet}&rdquo;
-                                </p>
-                                <div className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted">
-                                  supports · {item.supports}
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="font-mono text-[12px] text-muted">
-                            No manual evidence retrieved for this case.
-                          </p>
-                        )}
-                      </Panel>
-                    ) : null}
-
-                    {activeTab === "reasoning" ? (
-                      <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
-                        <Panel title="RepairGraph" code="reasoning path">
-                          <RepairFlow nodes={result.graph.nodes} edges={result.graph.edges} />
-                        </Panel>
-
-                        <Panel title="Agent log" code="trace">
-                          <ol className="space-y-4">
-                            {result.agent_timeline.map((event) => (
-                              <li key={event.id} className="relative border-l border-line/10 pl-4">
-                                <span
-                                  className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-housing ${
-                                    event.status === "warning" ? "bg-caution" : "bg-signal"
-                                  }`}
-                                />
-                                <div className="flex items-center gap-2">
-                                  <span className="font-display text-[13px] font-medium text-chalk">
-                                    {event.agent}
-                                  </span>
-                                  <span
-                                    className={`font-mono text-[9px] uppercase tracking-widest ${
-                                      event.status === "warning" ? "text-caution" : "text-signal"
-                                    }`}
-                                  >
-                                    {event.status}
-                                  </span>
-                                </div>
-                                <div className="mt-1 font-mono text-[11px] leading-5 text-muted">
-                                  {event.action}
-                                </div>
-                                <div className="mt-0.5 text-[12px] leading-5 text-muted/80">
-                                  {event.detail}
-                                </div>
-                              </li>
-                            ))}
-                          </ol>
-                        </Panel>
-                      </div>
-                    ) : null}
-                  </div>
-                </>
-              ) : (
-                <Panel title="Diagnostic sequence" code="RepairGraph">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-widest">
-                      <span className="text-muted">Target</span>
-                      <span className="text-chalk">{appliance || "—"}</span>
-                    </div>
-
-                    {phase === "running" ? (
-                      <div>
-                        <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest">
-                          <span className="text-signal">Running diagnostics</span>
-                          <span className="text-muted">
-                            {Math.min(activeStep + 1, AGENTS.length)}/{AGENTS.length}
-                          </span>
                         </div>
-                        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-line/10">
-                          <div
-                            className="h-full rounded-full bg-signal transition-all duration-300"
-                            style={{
-                              width: `${(Math.min(activeStep + 1, AGENTS.length) / AGENTS.length) * 100}%`,
-                            }}
+                      ) : null}
+
+                      <div className="grid gap-2.5 sm:grid-cols-2">
+                        {AGENTS.map((agent, index) => (
+                          <AgentRow
+                            key={agent.id}
+                            index={index}
+                            agent={agent}
+                            status={stepStatus(index)}
+                          />
+                        ))}
+                      </div>
+
+                      {phase === "idle" ? (
+                        <p className="font-mono text-[11px] leading-5 text-muted">
+                          Standby. Fill the intake on the left and run a diagnosis.
+                        </p>
+                      ) : null}
+
+                      {phase === "done" && result ? (
+                        <p className="font-mono text-[11px] leading-5 text-signal">
+                          Diagnosis complete — open the Diagnosis tab for the recommendation.
+                        </p>
+                      ) : null}
+                    </div>
+                  </Panel>
+                ) : null}
+
+                {activeTab === "diagnosis" ? (
+                  result ? (
+                    <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr]">
+                      <Panel title="Repair recommendation" code="primary" accent>
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                          <Gauge value={result.recommendation.confidence} />
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <ConfidencePill value={result.recommendation.confidence} />
+                              <Chip>{result.recommendation.difficulty}</Chip>
+                              <Chip>{result.recommendation.estimated_time_minutes} min</Chip>
+                              <Chip>${result.recommendation.estimated_cost_usd}</Chip>
+                            </div>
+                            <h3 className="mt-3 font-display text-2xl font-semibold leading-snug text-chalk">
+                              {result.recommendation.title}
+                            </h3>
+                            <p className="mt-2 leading-7 text-muted">
+                              {result.recommendation.summary}
+                            </p>
+                          </div>
+                        </div>
+                      </Panel>
+
+                      <Panel title="Likely causes" code="ranked">
+                        <ul className="space-y-3">
+                          {result.likely_causes.map((cause) => (
+                            <li
+                              key={cause.name}
+                              className="rounded-lg border border-line/[0.08] bg-line/[0.02] p-3"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-display text-sm font-medium text-chalk">
+                                  {cause.name}
+                                </span>
+                                <span className="flex items-center gap-2">
+                                  <SignalBars level={cause.likelihood} />
+                                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
+                                    {cause.likelihood}
+                                  </span>
+                                </span>
+                              </div>
+                              <p className="mt-2 text-[13px] leading-6 text-muted">
+                                {cause.evidence}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                      </Panel>
+                    </div>
+                  ) : (
+                    <RunFirst />
+                  )
+                ) : null}
+
+                {activeTab === "plan" ? (
+                  result ? (
+                    <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr]">
+                      <Panel title="Repair plan" code="procedure">
+                        <ol className="space-y-3">
+                          {result.repair_plan.map((step) => (
+                            <li
+                              key={step.step}
+                              className="flex gap-4 rounded-lg border border-line/[0.08] bg-line/[0.02] p-4"
+                            >
+                              <span className="font-mono text-sm text-signal">
+                                {String(step.step).padStart(2, "0")}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-display text-sm font-semibold text-chalk">
+                                  {step.title}
+                                </h4>
+                                <p className="mt-1 text-[13px] leading-6 text-muted">
+                                  {step.detail}
+                                </p>
+                                {step.tools.length > 0 ? (
+                                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                    {step.tools.map((tool) => (
+                                      <Chip key={tool}>{tool}</Chip>
+                                    ))}
+                                  </div>
+                                ) : null}
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </Panel>
+
+                      <Panel title="Safety" code="human check">
+                        <p className="mb-3 font-mono text-[11px] leading-5 text-muted">
+                          Human review required before you proceed.
+                        </p>
+                        <ul className="space-y-2.5">
+                          {result.safety_warnings.map((warning) => (
+                            <li
+                              key={warning}
+                              className="flex gap-3 rounded-lg border border-caution/25 bg-caution/[0.06] p-3"
+                            >
+                              <span className="mt-0.5 font-mono text-caution">▲</span>
+                              <span className="text-[13px] leading-6 text-chalk/90">
+                                {warning}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </Panel>
+                    </div>
+                  ) : (
+                    <RunFirst />
+                  )
+                ) : null}
+
+                {activeTab === "impact" ? (
+                  result ? (
+                    <div className="grid gap-5 lg:grid-cols-2">
+                      <Panel title="Repair vs replace" code="cost">
+                        <div className="rounded-lg border border-signal/25 bg-signal/[0.06] p-5">
+                          <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
+                            You keep
+                          </div>
+                          <div className="mt-1 font-mono text-4xl font-semibold text-chalk">
+                            $
+                            {result.sustainability_impact.replace_cost_usd -
+                              result.recommendation.estimated_cost_usd}
+                          </div>
+                          <div className="mt-2 flex items-center gap-2 font-mono text-[12px] text-muted">
+                            <span className="text-signal">
+                              Repair ${result.recommendation.estimated_cost_usd}
+                            </span>
+                            <span className="text-muted/50">vs</span>
+                            <span className="text-muted line-through decoration-caution/60">
+                              Replace ${result.sustainability_impact.replace_cost_usd}
+                            </span>
+                          </div>
+                        </div>
+                      </Panel>
+
+                      <Panel title="Environmental impact" code="repair · not replace">
+                        <div className="grid grid-cols-2 gap-3">
+                          <Figure
+                            value={result.sustainability_impact.landfill_waste_avoided_kg}
+                            unit="kg"
+                            label="Waste avoided"
+                          />
+                          <Figure
+                            value={result.sustainability_impact.co2_saved_kg}
+                            unit="kg CO₂"
+                            label="Emissions saved"
                           />
                         </div>
-                      </div>
-                    ) : null}
-
-                    <div className="grid gap-2.5 sm:grid-cols-2">
-                      {AGENTS.map((agent, index) => (
-                        <AgentRow
-                          key={agent.id}
-                          index={index}
-                          agent={agent}
-                          status={stepStatus(index)}
-                        />
-                      ))}
+                        <p className="mt-4 text-[13px] leading-6 text-muted">
+                          {result.sustainability_impact.message}
+                        </p>
+                      </Panel>
                     </div>
+                  ) : (
+                    <RunFirst />
+                  )
+                ) : null}
 
-                    {phase === "idle" ? (
-                      <p className="font-mono text-[11px] leading-5 text-muted">
-                        Standby. Fill the intake on the left and run a diagnosis.
-                      </p>
-                    ) : null}
-                  </div>
-                </Panel>
-              )}
+                {activeTab === "evidence" ? (
+                  result ? (
+                    <Panel title="Evidence" code="retrieval">
+                      {result.evidence.length > 0 ? (
+                        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                          {result.evidence.map((item) => (
+                            <li
+                              key={item.id}
+                              className="rounded-lg border border-line/[0.08] bg-line/[0.02] p-3"
+                            >
+                              <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
+                                {item.source}
+                              </div>
+                              <p className="mt-2 text-[13px] leading-6 text-muted">
+                                &ldquo;{item.snippet}&rdquo;
+                              </p>
+                              <div className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted">
+                                supports · {item.supports}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="font-mono text-[12px] text-muted">
+                          No manual evidence retrieved for this case.
+                        </p>
+                      )}
+                    </Panel>
+                  ) : (
+                    <RunFirst />
+                  )
+                ) : null}
+
+                {activeTab === "reasoning" ? (
+                  result ? (
+                    <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
+                      <Panel title="RepairGraph" code="reasoning path">
+                        <RepairFlow nodes={result.graph.nodes} edges={result.graph.edges} />
+                      </Panel>
+
+                      <Panel title="Agent log" code="trace">
+                        <ol className="space-y-4">
+                          {result.agent_timeline.map((event) => (
+                            <li key={event.id} className="relative border-l border-line/10 pl-4">
+                              <span
+                                className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-housing ${
+                                  event.status === "warning" ? "bg-caution" : "bg-signal"
+                                }`}
+                              />
+                              <div className="flex items-center gap-2">
+                                <span className="font-display text-[13px] font-medium text-chalk">
+                                  {event.agent}
+                                </span>
+                                <span
+                                  className={`font-mono text-[9px] uppercase tracking-widest ${
+                                    event.status === "warning" ? "text-caution" : "text-signal"
+                                  }`}
+                                >
+                                  {event.status}
+                                </span>
+                              </div>
+                              <div className="mt-1 font-mono text-[11px] leading-5 text-muted">
+                                {event.action}
+                              </div>
+                              <div className="mt-0.5 text-[12px] leading-5 text-muted/80">
+                                {event.detail}
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </Panel>
+                    </div>
+                  ) : (
+                    <RunFirst />
+                  )
+                ) : null}
+              </div>
             </div>
           </div>
         )}
@@ -563,6 +613,16 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function RunFirst() {
+  return (
+    <Panel title="No diagnosis yet" code="standby">
+      <p className="font-mono text-[12px] leading-5 text-muted">
+        Run a diagnosis from the intake on the left to populate this tab.
+      </p>
+    </Panel>
   );
 }
 
