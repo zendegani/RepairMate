@@ -9,14 +9,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#17211f",
-        mint: "#c8f6df",
-        repair: "#176b58",
-        copper: "#c56f3d",
-        graphite: "#283633",
+        housing: "#0b1311",
+        panel: "#101a17",
+        raised: "#15211d",
+        chalk: "#e7efe9",
+        muted: "#7b918a",
+        signal: "#39d98a",
+        caution: "#e8a24a",
+      },
+      fontFamily: {
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       boxShadow: {
-        panel: "0 18px 60px rgba(23, 33, 31, 0.12)",
+        panel: "0 24px 50px -28px rgba(0, 0, 0, 0.7)",
+        signal: "0 0 0 1px rgba(57, 217, 138, 0.35), 0 0 22px -4px rgba(57, 217, 138, 0.35)",
       },
     },
   },

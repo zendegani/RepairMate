@@ -2,7 +2,6 @@
 
 import {
   Background,
-  Controls,
   Handle,
   Position,
   ReactFlow,
@@ -13,19 +12,28 @@ import {
 import "@xyflow/react/dist/style.css";
 import type { FlowEdgeDto, FlowNodeDto } from "@/lib/types";
 
-const nodeColors: Record<FlowNodeDto["kind"], string> = {
-  input: "border-repair bg-white",
-  agent: "border-copper bg-white",
-  decision: "border-ink bg-mint",
-  output: "border-graphite bg-white",
+const nodeBorder: Record<FlowNodeDto["kind"], string> = {
+  input: "border-signal/70",
+  agent: "border-white/25",
+  decision: "border-caution/70",
+  output: "border-signal/40",
 };
 
-function RepairNode({ data }: NodeProps<Node<{ label: string; kind: FlowNodeDto["kind"] }>>) {
+function RepairNode({
+  data,
+}: NodeProps<Node<{ label: string; kind: FlowNodeDto["kind"] }>>) {
   return (
-    <div className={`min-w-40 rounded-md border-2 px-4 py-3 text-sm font-semibold text-ink shadow-sm ${nodeColors[data.kind]}`}>
-      <Handle type="target" position={Position.Left} className="!bg-graphite" />
-      {data.label}
-      <Handle type="source" position={Position.Right} className="!bg-graphite" />
+    <div
+      className={`min-w-[150px] rounded-lg border bg-raised px-3.5 py-2.5 shadow-panel ${nodeBorder[data.kind]}`}
+    >
+      <Handle type="target" position={Position.Left} className="!h-1.5 !w-1.5 !border-0 !bg-signal" />
+      <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
+        {data.kind}
+      </div>
+      <div className="mt-0.5 font-display text-sm font-medium text-chalk">
+        {data.label}
+      </div>
+      <Handle type="source" position={Position.Right} className="!h-1.5 !w-1.5 !border-0 !bg-signal" />
     </div>
   );
 }
@@ -60,23 +68,30 @@ export function RepairFlow({ nodes, edges }: RepairFlowProps) {
     id: edge.id,
     source: edge.source,
     target: edge.target,
-    label: edge.label,
+    label: edge.label ?? undefined,
     animated: true,
-    style: { stroke: "#176b58", strokeWidth: 2 },
+    style: { stroke: "#39d98a", strokeWidth: 1.5 },
+    labelStyle: { fill: "#7b918a", fontFamily: "var(--font-mono)", fontSize: 10 },
+    labelBgStyle: { fill: "#101a17", fillOpacity: 0.95 },
+    labelBgPadding: [5, 3] as [number, number],
+    labelBgBorderRadius: 3,
   }));
 
   return (
-    <div className="h-[340px] overflow-hidden rounded-lg border border-black/10 bg-white">
+    <div className="h-[320px] overflow-hidden rounded-lg border border-white/10 bg-housing">
       <ReactFlow
         nodes={flowNodes}
         edges={flowEdges}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.18 }}
+        fitViewOptions={{ padding: 0.2 }}
         nodesDraggable={false}
+        nodesConnectable={false}
+        zoomOnScroll={false}
+        panOnScroll={false}
+        proOptions={{ hideAttribution: true }}
       >
-        <Background color="#d7ded9" gap={18} />
-        <Controls showInteractive={false} />
+        <Background color="#1c2a26" gap={22} />
       </ReactFlow>
     </div>
   );
