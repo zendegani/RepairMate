@@ -285,7 +285,7 @@ export default function Home() {
             </div>
 
             <div>
-              <div className="sticky top-[72px] z-10 rounded-xl border border-line/10 bg-housing/90 px-4 py-3 shadow-panel backdrop-blur">
+              <div className="lg:sticky lg:top-[72px] z-10 rounded-xl border border-line/10 bg-housing/90 px-4 py-3 shadow-panel backdrop-blur">
                 <div className="flex gap-1 overflow-x-auto">
                   {TABS.map((tab) => (
                     <button
