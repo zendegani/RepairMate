@@ -73,14 +73,12 @@ export default function Home() {
   // Each agent runs for a beat, settles to done, then pauses before the next
   // starts — so the sequence reads like real work rather than a fast wipe.
   async function runSequence(reduced: boolean) {
-    const runMs = reduced ? 0 : 520;
-    const pauseMs = reduced ? 0 : 220;
     for (let i = 0; i < AGENTS.length; i += 1) {
       setActiveStep(i);
       setSettling(false);
-      if (runMs) await wait(runMs);
+      if (!reduced) await wait(360 + Math.random() * 520);
       setSettling(true);
-      if (pauseMs) await wait(pauseMs);
+      if (!reduced) await wait(140 + Math.random() * 220);
     }
     setActiveStep(AGENTS.length);
     setSettling(false);
@@ -155,6 +153,7 @@ export default function Home() {
             <span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted sm:inline">
               <span className="text-signal">●</span> online
             </span>
+            <ThemeToggle />
             <button
               type="button"
               onClick={enterWorkspace}
@@ -162,7 +161,6 @@ export default function Home() {
             >
               Try it out
             </button>
-            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -559,7 +557,7 @@ export default function Home() {
 
                 {activeTab === "reasoning" ? (
                   result ? (
-                    <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
+                    <div className="space-y-5">
                       <Panel title="RepairGraph" code="reasoning path">
                         <RepairFlow nodes={result.graph.nodes} edges={result.graph.edges} />
                       </Panel>
