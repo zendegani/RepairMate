@@ -37,6 +37,7 @@ class RepairStep(BaseModel):
 class SustainabilityImpact(BaseModel):
     landfill_waste_avoided_kg: float
     co2_saved_kg: float
+    replace_cost_usd: int
     message: str
 
 

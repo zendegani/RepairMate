@@ -43,6 +43,11 @@ def test_diagnose_returns_full_demo_shape():
     # The drain scenario should retrieve evidence and rank the filter first.
     assert body["evidence"]
     assert body["likely_causes"][0]["name"] == "Blocked drain filter"
+    # Replace cost drives the repair-vs-replace comparison and beats the repair cost.
+    assert (
+        body["sustainability_impact"]["replace_cost_usd"]
+        > body["recommendation"]["estimated_cost_usd"]
+    )
     assert {event["id"] for event in body["agent_timeline"]} >= {
         "intake",
         "retrieval",
