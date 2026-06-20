@@ -12,7 +12,7 @@ package slug remain `repairmate`; `FixWise` is the product name.)
 
 ## Layout
 
-```
+```text
 apps/
   frontend/            # Next.js App Router
     app/               # routes, layout, global styles

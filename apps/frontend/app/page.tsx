@@ -46,21 +46,30 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeStep, setActiveStep] = useState(-1);
+  const [settling, setSettling] = useState(false);
 
   function stepStatus(index: number) {
     if (phase === "idle") return "standby" as const;
     if (phase === "done") return "done" as const;
     if (index < activeStep) return "done" as const;
-    if (index === activeStep) return "running" as const;
+    if (index === activeStep) return settling ? ("done" as const) : ("running" as const);
     return "pending" as const;
   }
 
-  async function runSequence(delay: number) {
+  // Each agent runs for a beat, settles to done, then pauses before the next
+  // starts — so the sequence reads like real work rather than a fast wipe.
+  async function runSequence(reduced: boolean) {
+    const runMs = reduced ? 0 : 520;
+    const pauseMs = reduced ? 0 : 220;
     for (let i = 0; i < AGENTS.length; i += 1) {
       setActiveStep(i);
-      if (delay) await wait(delay);
+      setSettling(false);
+      if (runMs) await wait(runMs);
+      setSettling(true);
+      if (pauseMs) await wait(pauseMs);
     }
     setActiveStep(AGENTS.length);
+    setSettling(false);
   }
 
   const onSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
@@ -69,6 +78,7 @@ export default function Home() {
     setResult(null);
     setPhase("running");
     setActiveStep(0);
+    setSettling(false);
 
     const payload: DiagnoseRequest = {
       appliance,
@@ -85,7 +95,7 @@ export default function Home() {
     try {
       const [diagnosis] = await Promise.all([
         diagnoseRepair(payload),
-        runSequence(reducedMotion() ? 0 : 460),
+        runSequence(reducedMotion()),
       ]);
       setResult(diagnosis);
       setPhase("done");
@@ -97,6 +107,7 @@ export default function Home() {
       );
       setPhase("idle");
       setActiveStep(-1);
+      setSettling(false);
     }
   };
 
