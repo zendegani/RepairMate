@@ -1,9 +1,14 @@
 {
   "name": "repairmate",
   "private": true,
+  "workspaces": [
+    "apps/frontend"
+  ],
   "scripts": {
-    "dev:frontend": "npm --prefix apps/frontend run dev",
-    "build:frontend": "npm --prefix apps/frontend run build",
-    "dev:backend": "uv run --project apps/backend uvicorn app.main:app --reload --port 8000"
+    "dev:frontend": "npm run dev -w @repairmate/frontend",
+    "build:frontend": "npm run build -w @repairmate/frontend",
+    "lint:frontend": "npm run lint -w @repairmate/frontend",
+    "dev:backend": "uv run --project apps/backend uvicorn app.main:app --reload --app-dir apps/backend --port 8000",
+    "test:backend": "cd apps/backend && uv run pytest"
   }
 }
