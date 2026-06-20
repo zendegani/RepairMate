@@ -1,0 +1,18 @@
+{
+  "wm-drain-filter": {
+    "source": "Service manual · Drain & pump assembly",
+    "snippet": "If the machine completes a cycle but water remains, first clean the drain pump filter. A clogged filter is the most common cause of incomplete drainage on front-load washers."
+  },
+  "wm-drain-hose": {
+    "source": "Service manual · Drain hose routing",
+    "snippet": "Ensure the drain hose is not kinked or pushed more than 10 cm into the standpipe. Restricted hoses cause slow or absent drainage without tripping a fault code."
+  },
+  "wm-drain-pump": {
+    "source": "Service manual · Drain pump diagnostics",
+    "snippet": "A continuous hum during the drain phase indicates the pump receives power but the impeller may be jammed by debris. Verify free rotation before replacing the pump."
+  },
+  "generic-inspect": {
+    "source": "General appliance service guide",
+    "snippet": "Begin every diagnosis by isolating power, then inspect the most accessible serviceable parts for blockages, wear, and loose connections before ordering replacement components."
+  }
+}

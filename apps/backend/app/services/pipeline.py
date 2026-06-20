@@ -1,145 +1,106 @@
 """Diagnosis orchestrator.
 
-Today this returns a static, reliable payload for the washing-machine-not-draining
-demo. It is the single seam the agent pipeline (intake -> retrieval -> diagnosis ->
-planner -> sustainability -> safety -> graph_builder) will grow into, so the router
-never has to change as the internals become real.
+Runs the deterministic agent pipeline in sequence — intake -> retrieval ->
+diagnosis -> planner -> sustainability -> safety -> graph_builder — recording an
+event per agent, then assembles the response. The router calls only this seam.
 """
 
-from app.schemas import (
-    Cause,
-    DiagnoseRequest,
-    DiagnoseResponse,
-    FlowEdge,
-    FlowGraph,
-    FlowNode,
-    Recommendation,
-    RepairStep,
-    SustainabilityImpact,
-    TimelineEvent,
+from app.schemas import DiagnoseRequest, DiagnoseResponse, TimelineEvent
+from app.services import (
+    graph_builder,
+    planner,
+    retrieval,
+    safety,
+    sustainability,
 )
+from app.services.diagnosis import diagnose
+from app.services.intake import run_intake
 
 
 def run_pipeline(request: DiagnoseRequest) -> DiagnoseResponse:
+    events: list[TimelineEvent] = []
+
+    intake = run_intake(request)
+    events.append(
+        TimelineEvent(
+            id="intake",
+            agent="Intake Agent",
+            action="Parsed appliance, symptoms, and skill level",
+            status="complete",
+            detail=f"Routed the request to scenario '{intake.scenario}'.",
+        )
+    )
+
+    evidence = retrieval.retrieve_evidence(intake)
+    events.append(
+        TimelineEvent(
+            id="retrieval",
+            agent="Retrieval Agent",
+            action="Retrieved manual evidence",
+            status="complete",
+            detail=f"Pulled {len(evidence)} manual snippet(s) from the service knowledge base.",
+        )
+    )
+
+    diagnosis = diagnose(intake, evidence)
+    top_cause = diagnosis.causes[0].name if diagnosis.causes else "no clear cause"
+    events.append(
+        TimelineEvent(
+            id="triage",
+            agent="Triage Agent",
+            action="Ranked likely causes",
+            status="complete",
+            detail=f"Ranked {len(diagnosis.causes)} cause(s); most likely: {top_cause}.",
+        )
+    )
+
+    repair_plan = planner.build_plan(intake, diagnosis)
+    events.append(
+        TimelineEvent(
+            id="planner",
+            agent="Planner Agent",
+            action="Built the guided repair plan",
+            status="complete",
+            detail=f"Sequenced {len(repair_plan)} repair step(s) for a {intake.skill_level} user.",
+        )
+    )
+
+    warnings = safety.screen_safety(intake, diagnosis, repair_plan)
+    events.append(
+        TimelineEvent(
+            id="safety",
+            agent="Safety Agent",
+            action="Screened the plan for household risk",
+            status="warning" if warnings else "complete",
+            detail=f"Flagged {len(warnings)} safety warning(s) for human review.",
+        )
+    )
+
+    impact = sustainability.estimate_impact(intake)
+    events.append(
+        TimelineEvent(
+            id="impact",
+            agent="Impact Agent",
+            action="Estimated repair vs replace",
+            status="complete",
+            detail=(
+                f"Avoided about {impact.landfill_waste_avoided_kg} kg of waste and "
+                f"{impact.co2_saved_kg} kg CO2 versus replacement."
+            ),
+        )
+    )
+
+    graph = graph_builder.build_graph(intake, diagnosis)
+
     return DiagnoseResponse(
-        appliance=request.appliance or "Washing machine",
-        issue=request.issue or "Does not drain",
-        recommendation=Recommendation(
-            title="Clear the drain path before replacing parts",
-            confidence=0.87,
-            summary=(
-                "The safest first repair is to inspect the drain filter, drain hose, "
-                "and pump inlet for a blockage. The symptom pattern fits a clog more "
-                "strongly than an electrical pump failure."
-            ),
-            estimated_time_minutes=35,
-            estimated_cost_usd=12,
-            difficulty="Easy",
-        ),
-        likely_causes=[
-            Cause(
-                name="Blocked drain filter",
-                likelihood="High",
-                evidence="Standing water plus a completed wash cycle usually points to debris trapped before the pump.",
-            ),
-            Cause(
-                name="Kinked or clogged drain hose",
-                likelihood="Medium",
-                evidence="Slow or absent drainage can happen when the hose is pinched behind the machine.",
-            ),
-            Cause(
-                name="Drain pump obstruction or failure",
-                likelihood="Medium",
-                evidence="A humming sound during drain suggests the pump is powered but may be jammed.",
-            ),
-        ],
-        repair_plan=[
-            RepairStep(
-                step=1,
-                title="Power down and protect the floor",
-                detail="Unplug the washer, turn off water supply valves, and place towels plus a shallow tray near the access panel.",
-                tools=["Towels", "Shallow tray"],
-            ),
-            RepairStep(
-                step=2,
-                title="Drain residual water",
-                detail="Open the lower service flap and use the emergency drain tube if available. Keep the cap low and drain slowly.",
-                tools=["Tray", "Gloves"],
-            ),
-            RepairStep(
-                step=3,
-                title="Clean the drain filter",
-                detail="Unscrew the filter counterclockwise, remove lint, coins, buttons, or fabric debris, then rinse the filter.",
-                tools=["Gloves", "Flashlight"],
-            ),
-            RepairStep(
-                step=4,
-                title="Inspect hose and pump impeller",
-                detail="Check the drain hose for kinks. With the filter removed, confirm the pump impeller turns freely.",
-                tools=["Flashlight"],
-            ),
-            RepairStep(
-                step=5,
-                title="Run a rinse and drain test",
-                detail="Reinstall the filter tightly, restore power, and run a short rinse/drain cycle while watching for leaks.",
-                tools=[],
-            ),
-        ],
-        sustainability_impact=SustainabilityImpact(
-            landfill_waste_avoided_kg=68.0,
-            co2_saved_kg=155.0,
-            message="Repairing the drain path can extend the washer's life and avoid the footprint of premature replacement.",
-        ),
-        safety_warnings=[
-            "Unplug the appliance before opening any service panel.",
-            "Do not tip the washer alone; water weight can make it unstable.",
-            "Stop if you smell burning, see damaged wiring, or the pump housing leaks.",
-        ],
-        agent_timeline=[
-            TimelineEvent(
-                id="intake",
-                agent="Intake Agent",
-                action="Parsed appliance, symptoms, and user skill level",
-                status="complete",
-                detail="Detected a drain failure scenario for a front-load washing machine.",
-            ),
-            TimelineEvent(
-                id="triage",
-                agent="Triage Agent",
-                action="Ranked likely causes",
-                status="complete",
-                detail="Prioritized low-cost blockage checks before part replacement.",
-            ),
-            TimelineEvent(
-                id="safety",
-                agent="Safety Agent",
-                action="Screened repair plan for household risk",
-                status="warning",
-                detail="Added power, water, spill, and instability warnings.",
-            ),
-            TimelineEvent(
-                id="impact",
-                agent="Impact Agent",
-                action="Estimated repair-vs-replace impact",
-                status="complete",
-                detail="Calculated avoided appliance waste and manufacturing emissions.",
-            ),
-        ],
-        graph=FlowGraph(
-            nodes=[
-                FlowNode(id="symptoms", label="Symptom intake", kind="input"),
-                FlowNode(id="triage", label="Cause ranking", kind="agent"),
-                FlowNode(id="safety", label="Safety check", kind="agent"),
-                FlowNode(id="decision", label="Repairable at home?", kind="decision"),
-                FlowNode(id="plan", label="Guided repair plan", kind="output"),
-                FlowNode(id="impact", label="Sustainability impact", kind="output"),
-            ],
-            edges=[
-                FlowEdge(id="e1", source="symptoms", target="triage", label="symptoms"),
-                FlowEdge(id="e2", source="triage", target="safety", label="candidate fix"),
-                FlowEdge(id="e3", source="safety", target="decision", label="risk screen"),
-                FlowEdge(id="e4", source="decision", target="plan", label="yes"),
-                FlowEdge(id="e5", source="decision", target="impact", label="estimate"),
-            ],
-        ),
+        appliance=intake.appliance,
+        issue=intake.issue,
+        recommendation=diagnosis.recommendation,
+        likely_causes=diagnosis.causes,
+        repair_plan=repair_plan,
+        sustainability_impact=impact,
+        safety_warnings=warnings,
+        evidence=evidence,
+        agent_timeline=events,
+        graph=graph,
     )

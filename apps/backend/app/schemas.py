@@ -40,6 +40,13 @@ class SustainabilityImpact(BaseModel):
     message: str
 
 
+class Evidence(BaseModel):
+    id: str
+    source: str
+    snippet: str
+    supports: str
+
+
 class TimelineEvent(BaseModel):
     id: str
     agent: str
@@ -74,5 +81,6 @@ class DiagnoseResponse(BaseModel):
     repair_plan: list[RepairStep]
     sustainability_impact: SustainabilityImpact
     safety_warnings: list[str]
+    evidence: list[Evidence]
     agent_timeline: list[TimelineEvent]
     graph: FlowGraph

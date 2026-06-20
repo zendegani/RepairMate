@@ -1,0 +1,12 @@
+{
+  "Washing machine": {
+    "landfill_waste_avoided_kg": 68.0,
+    "co2_saved_kg": 155.0,
+    "message": "Repairing the drain path can extend the washer's life and avoid the footprint of premature replacement."
+  },
+  "default": {
+    "landfill_waste_avoided_kg": 40.0,
+    "co2_saved_kg": 90.0,
+    "message": "Repairing instead of replacing keeps a working appliance out of landfill and avoids the emissions of manufacturing a new unit."
+  }
+}

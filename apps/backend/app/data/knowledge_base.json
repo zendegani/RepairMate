@@ -1,0 +1,107 @@
+{
+  "washing_machine.no_drain": {
+    "appliance": "Washing machine",
+    "issue": "Does not drain",
+    "recommendation": {
+      "title": "Clear the drain path before replacing parts",
+      "confidence": 0.87,
+      "summary": "The safest first repair is to inspect the drain filter, drain hose, and pump inlet for a blockage. The symptom pattern fits a clog more strongly than an electrical pump failure.",
+      "estimated_time_minutes": 35,
+      "estimated_cost_usd": 12,
+      "difficulty": "Easy"
+    },
+    "causes": [
+      {
+        "name": "Blocked drain filter",
+        "likelihood": "High",
+        "evidence": "Standing water plus a completed wash cycle usually points to debris trapped before the pump.",
+        "manual": "wm-drain-filter"
+      },
+      {
+        "name": "Kinked or clogged drain hose",
+        "likelihood": "Medium",
+        "evidence": "Slow or absent drainage can happen when the hose is pinched behind the machine.",
+        "manual": "wm-drain-hose"
+      },
+      {
+        "name": "Drain pump obstruction or failure",
+        "likelihood": "Medium",
+        "evidence": "A humming sound during drain suggests the pump is powered but may be jammed.",
+        "manual": "wm-drain-pump"
+      }
+    ],
+    "repair_plan": [
+      {
+        "title": "Power down and protect the floor",
+        "detail": "Unplug the washer, turn off water supply valves, and place towels plus a shallow tray near the access panel.",
+        "tools": ["Towels", "Shallow tray"]
+      },
+      {
+        "title": "Drain residual water",
+        "detail": "Open the lower service flap and use the emergency drain tube if available. Keep the cap low and drain slowly.",
+        "tools": ["Tray", "Gloves"]
+      },
+      {
+        "title": "Clean the drain filter",
+        "detail": "Unscrew the filter counterclockwise, remove lint, coins, buttons, or fabric debris, then rinse the filter.",
+        "tools": ["Gloves", "Flashlight"]
+      },
+      {
+        "title": "Inspect hose and pump impeller",
+        "detail": "Check the drain hose for kinks. With the filter removed, confirm the pump impeller turns freely.",
+        "tools": ["Flashlight"]
+      },
+      {
+        "title": "Run a rinse and drain test",
+        "detail": "Reinstall the filter tightly, restore power, and run a short rinse/drain cycle while watching for leaks.",
+        "tools": []
+      }
+    ],
+    "safety": [
+      "Unplug the appliance before opening any service panel.",
+      "Do not tip the washer alone; water weight can make it unstable.",
+      "Stop if you smell burning, see damaged wiring, or the pump housing leaks."
+    ]
+  },
+  "generic": {
+    "appliance": "Appliance",
+    "issue": "Reported fault",
+    "recommendation": {
+      "title": "Isolate the fault before replacing the unit",
+      "confidence": 0.52,
+      "summary": "Start by confirming power, inspecting the most accessible serviceable parts, and checking for obvious blockages or loose connections before considering a replacement.",
+      "estimated_time_minutes": 30,
+      "estimated_cost_usd": 0,
+      "difficulty": "Moderate"
+    },
+    "causes": [
+      {
+        "name": "Undiagnosed component fault",
+        "likelihood": "Medium",
+        "evidence": "Without a matching symptom profile, the fault needs a hands-on inspection to localize.",
+        "manual": "generic-inspect"
+      }
+    ],
+    "repair_plan": [
+      {
+        "title": "Disconnect power and water",
+        "detail": "Unplug the appliance and shut off any connected water supply before inspecting.",
+        "tools": ["Gloves"]
+      },
+      {
+        "title": "Inspect accessible serviceable parts",
+        "detail": "Check filters, hoses, seals, and visible connections for blockages, wear, or looseness.",
+        "tools": ["Flashlight", "Screwdriver"]
+      },
+      {
+        "title": "Test after each check",
+        "detail": "Restore power and run a short cycle after each fix to confirm whether the fault is resolved.",
+        "tools": []
+      }
+    ],
+    "safety": [
+      "Always disconnect power before opening an appliance.",
+      "Stop if you find scorched wiring, water near electronics, or a gas smell."
+    ]
+  }
+}
