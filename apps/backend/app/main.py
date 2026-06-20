@@ -10,7 +10,7 @@ DEFAULT_CORS_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
 # Match this project's Vercel deployments (branch + preview URLs all start with
 # the project prefix) so new preview domains don't need to be added to the env
 # config one by one — without trusting arbitrary third-party *.vercel.app sites.
-DEFAULT_CORS_ORIGIN_REGEX = r"https://repair365mate-[a-z0-9-]+\.vercel\.app"
+DEFAULT_CORS_ORIGIN_REGEX = r"https://repair-mate-[a-z0-9-]+\.vercel\.app"
 logger = logging.getLogger("repairmate.backend")
 
 

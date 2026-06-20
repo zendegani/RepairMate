@@ -32,7 +32,7 @@ def test_cors_preflight_allows_configured_origin(monkeypatch):
 def test_cors_preflight_allows_project_vercel_preview_url():
     # A preview URL for this project that is not in CORS_ALLOW_ORIGINS should
     # still pass via the default project-scoped Vercel regex.
-    origin = "https://repair365mate-git-feature-branch-acme.vercel.app"
+    origin = "https://repair-mate-frontend-git-feature-branch-acme.vercel.app"
     test_client = TestClient(create_app())
 
     response = test_client.options(
